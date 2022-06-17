@@ -1,0 +1,188 @@
+#!/bin/bash
+
+set -e
+
+###
+### Timing: Functions
+###
+log_time_file="/opt/frsr-build/build-timing.log"
+touch "$log_time_file"
+cleanup () {
+  echo "Durations:"
+  cat "$log_time_file"
+
+  echo "cleaning up..."
+  rm -f "$log_time_file"
+}
+trap "{ cleanup; }" EXIT
+
+log_time () {
+  local label=$1
+  local start=$2
+  local end=$3
+
+  local runtime=$((end-start))
+  local hours=$((runtime / 3600))
+  local minutes=$(( (runtime % 3600) / 60 ))
+  local seconds=$(( (runtime % 3600) % 60 ))
+  echo "${label}='${hours}h ${minutes}m ${seconds}s'" >> "$log_time_file"
+}
+
+
+
+###
+### Timing: script
+###
+starttime_script=`date +%s`
+
+# validation
+if [ -z "$APP_VERSION" ]; then
+  echo "Missing required env variable: APP_VERSION"
+  exit 1
+fi
+
+if [ -z "$APP_SUBPATH" ]; then
+  APP_SUBPATH="react"
+fi
+
+
+# Where to unzip the contents to do the build
+BUILD_CONTENTS_DIRECTORY="/buildcontents"
+mkdir -p "$BUILD_CONTENTS_DIRECTORY"
+
+# Generate Next Bulid ID if using build-manager mode
+if [ -n "${BUILD_MANAGER_MODE}" ] ; then
+  export NEXT_BUILD_ID=$(< /proc/sys/kernel/random/uuid)
+  echo "Next Build ID is ${NEXT_BUILD_ID}"
+  # Base build only (no products) if manager mode
+  export PRODUCT_DATA='{"products":[]}'
+fi
+
+###
+### Pull the contents from s3
+###
+if [ -n "$S3_BUCKET_CONTENTS" ]; then
+  starttime_s3_pull=`date +%s`
+  S3_PATH_PREFIX_CONTENTS="${APP_SUBPATH}/${APP_VERSION}"
+  S3_FULL_PATH_CONTENTS="$S3_BUCKET_CONTENTS/${S3_PATH_PREFIX_CONTENTS}/contents.zip"
+
+  echo "pull contents from s3"
+  echo "S3_BUCKET_CONTENTS: $S3_BUCKET_CONTENTS"
+  echo "S3_PATH_PREFIX_CONTENTS: $S3_PATH_PREFIX_CONTENTS"
+  echo "S3_FULL_PATH_CONTENTS: $S3_FULL_PATH_CONTENTS"
+  aws s3 cp s3://$S3_FULL_PATH_CONTENTS "$BUILD_CONTENTS_DIRECTORY/contents.zip"
+  endtime_s3_pull=`date +%s`
+  log_time "s3_pull" $starttime_s3_pull $endtime_s3_pull
+
+  ###
+  ### Unzip the contents
+  ###
+  starttime_unzip=`date +%s`
+  echo "extract the contents of contents.zip"
+  unzip "$BUILD_CONTENTS_DIRECTORY/contents.zip" -d "$BUILD_CONTENTS_DIRECTORY"
+  rm "$BUILD_CONTENTS_DIRECTORY/contents.zip"
+  endtime_unzip=`date +%s`
+  log_time "unzip" $starttime_unzip $endtime_unzip
+fi
+
+###
+### Run the build
+###
+starttime_build=`date +%s`
+echo "run the build"
+cd "$BUILD_CONTENTS_DIRECTORY"
+
+if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/build.sh" ]; then
+  echo "scripts/build.sh found."
+
+  bash +x "$BUILD_CONTENTS_DIRECTORY/scripts/build.sh"
+else
+  echo "scripts/build.sh not found. Running 'npm run build'"
+  npm run build
+fi
+endtime_build=`date +%s`
+log_time "build" $starttime_build $endtime_build
+
+###
+### PUBLISH to s3
+###
+if [ -n "$PUBLISH_S3_BUCKET" ]; then
+  starttime_s3_publish=`date +%s`
+  BUILD_DIRECTORY="$BUILD_CONTENTS_DIRECTORY/$BUILD_OUTPUT_SUBDIRECTORY"
+  mkdir -p "$BUILD_DIRECTORY"
+  if [ -n "APP_SUBPATH_PUBLISH_SUFFIX" ]; then
+    APP_SUBPATH="${APP_SUBPATH}${APP_SUBPATH_PUBLISH_SUFFIX}"
+  fi
+  S3_PATH_PREFIX="${APP_SUBPATH}/${APP_VERSION}"
+  S3_FULL_PATH="$PUBLISH_S3_BUCKET/${S3_PATH_PREFIX}"
+
+  echo "push to s3:"
+  echo "BUILD_DIRECTORY: $BUILD_DIRECTORY"
+  echo "PUBLISH_S3_BUCKET: $PUBLISH_S3_BUCKET"
+  echo "S3_PATH_PREFIX: $S3_PATH_PREFIX"
+  echo "S3_FULL_PATH: $S3_FULL_PATH"
+
+  # ONLY Build manager mode should use --delete to clear our previous builds
+  if [ -n "${BUILD_MANAGER_MODE}" ] ; then
+    echo "Manager Mode: Removing old content and syncing with cloud"
+    aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH --delete
+  else
+    aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH
+  fi
+
+  endtime_s3_publish=`date +%s`
+  log_time "s3_publish" $starttime_s3_publish $endtime_s3_publish
+fi
+
+###
+### Run build manager
+###
+if [ -n "${BUILD_MANAGER_MODE}" ] && [ -f "/opt/ecom-build/scripts/build/manager-build.sh" ]; then
+  echo "scripts/manager-build.sh found and build manager mode enabled."
+  bash +x "/opt/ecom-build/scripts/build/manager-build.sh"
+  echo "Build mode done exiting."
+  exit 0
+else
+  echo "Skip build manager. Running build."
+fi
+
+
+###
+### Clear CloudFront cache (if distro ID provided & build-manager succeeded )
+###
+if [ -n "$CLOUDFRONT_DISTRIBUTION_ID" ] && [ -n "${BUILD_MANAGER_MODE}" ]; then
+  starttime_invalidate_cloudfront_cache=`date +%s`
+  echo "Invalidate Cloudfront Cache (distribution-id=$CLOUDFRONT_DISTRIBUTION_ID)"
+
+  if [ -z "$CLOUDFRONT_DISTRIBUTION_INVALIDATION_PATHS" ]; then
+    CLOUDFRONT_DISTRIBUTION_INVALIDATION_PATHS="/*"
+  fi
+
+  CLOUDFRONT_INVALIDATION_RESPONSE="$(aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths "${CLOUDFRONT_DISTRIBUTION_INVALIDATION_PATHS}")"
+  echo "$CLOUDFRONT_INVALIDATION_RESPONSE"
+  endtime_invalidate_cloudfront_cache=`date +%s`
+  log_time "invalidate_cloudfront" $starttime_invalidate_cloudfront_cache $endtime_invalidate_cloudfront_cache
+
+  starttime_invalidate_cloudfront_wait=`date +%s`
+  CLOUDFRONT_INVALIDATION_ID="$(echo "$CLOUDFRONT_INVALIDATION_RESPONSE" | jq -r ".Invalidation.Id" )"
+  # https://docs.aws.amazon.com/cli/latest/reference/cloudfront/wait/invalidation-completed.html
+  # wait for cloudfront invalidation to complete
+  echo "Wait for invalidation to complete (invalidation-id="$CLOUDFRONT_INVALIDATION_ID")"
+  aws cloudfront wait invalidation-completed \
+  --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+  --id "$CLOUDFRONT_INVALIDATION_ID"
+  endtime_invalidate_cloudfront_wait=`date +%s`
+  log_time "invalidate_cloudfront_wait" $starttime_invalidate_cloudfront_wait $endtime_invalidate_cloudfront_wait
+
+fi
+
+
+
+###
+### Timing: script
+###
+endtime_script=`date +%s`
+log_time "script" $starttime_script $endtime_script
+
+
+echo "Done"
