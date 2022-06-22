@@ -115,6 +115,7 @@ EOF
 
     # IF NOT TASK ID ERROR | maybe additional checks needed
     if ! [[ ${task_id} =~ ^[a-zA-Z0-9]+$ ]] || [[ ${task_id} == "undefined" ]] ; then
+        echo "debug: Task ID: ${task_id}"
         echo "error: task_id not valid" >&2
         exit 1
     fi
