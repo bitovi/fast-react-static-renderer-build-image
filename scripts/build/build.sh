@@ -137,9 +137,9 @@ fi
 ###
 ### Run build manager
 ###
-if [ -n "${BUILD_MANAGER_MODE}" ] && [ -f "/opt/ecom-build/scripts/build/manager-build.sh" ]; then
+if [ -n "${BUILD_MANAGER_MODE}" ] && [ -f "/opt/frsr-build/scripts/build/manager-build.sh" ]; then
   echo "scripts/manager-build.sh found and build manager mode enabled."
-  bash +x "/opt/ecom-build/scripts/build/manager-build.sh"
+  bash +x "/opt/frsr-build/scripts/build/manager-build.sh"
   echo "Build mode done exiting."
   exit 0
 else
