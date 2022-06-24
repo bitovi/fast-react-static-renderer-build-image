@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Publish Docker and Helm
       env:
-        AWS_ACCOUNT_NO: "368433847371"
+        AWS_ACCOUNT_NO: "271557913550"
         ECR_REGISTRY_ID: fast-react-static-renderer-build-image
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
