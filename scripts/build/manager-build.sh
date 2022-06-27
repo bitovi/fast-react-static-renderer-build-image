@@ -60,7 +60,7 @@ do
                 "name": "APP_VERSION",
                 "value": "${APP_VERSION}"
             },{
-                "name": "PRODUCT_DATA",
+                "name": "PAGE_DATA",
                 "value": ${slug_slice}
             },{
                 "name": "CONTENTFUL_SPACE_ID",
