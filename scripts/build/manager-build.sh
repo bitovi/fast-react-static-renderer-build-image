@@ -15,11 +15,12 @@ echo "Fetching the catalog from: ${CATALOG_URL}"
 curl -s "${CATALOG_URL}" > slugs.json
 
 # Decide container count & page per container
-slug_count=`jq '[.products[]] | length' slugs.json`
-if ! [[ ${slug_count} =~ ^[0-9]+$ ]] ; then
-   echo "error: slug_count not a number" >&2
-   exit 1
-fi
+# slug_count=`jq '[.products[]] | length' slugs.json`
+slug_count=`jq length slugs.json`
+# if ! [[ ${slug_count} =~ ^[0-9]+$ ]] ; then
+#    echo "error: slug_count not a number" >&2
+#    exit 1
+# fi
 
 # Contianer count needs to be rounded to ceiling, to ensure it includes all slugs
 container_count=$(( (${slug_count} / ${SLUG_PER_CONTAINER}) + (${slug_count} % ${SLUG_PER_CONTAINER} > 0 ) ))
@@ -39,7 +40,8 @@ do
     if [ -e slugs.json ]
         then
             # Output as text so json is not evaluated by the AWS CLI
-            slug_slice=$(jq "{products: .products[${array_start}:${array_end}]} | @text" slugs.json)
+            # slug_slice=$(jq "{products: .products[${array_start}:${array_end}]} | @text" slugs.json)
+            slug_slice=$(jq "[${array_start}:${array_end}] | @text" slugs.json)
 
             # TODO: test index out of range
             array_start="$((${array_end}))"
