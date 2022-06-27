@@ -41,7 +41,7 @@ do
         then
             # Output as text so json is not evaluated by the AWS CLI
             # slug_slice=$(jq "{products: .products[${array_start}:${array_end}]} | @text" slugs.json)
-            slug_slice=$(jq "[${array_start}:${array_end}] | @text" slugs.json)
+            slug_slice=$(jq ".[${array_start}:${array_end}] | @text" slugs.json)
 
             # TODO: test index out of range
             array_start="$((${array_end}))"
