@@ -3,8 +3,7 @@ name: Build and Publish
 on:
   push:
     # TODO: reset to main
-    #  branches: [ dev ]
-     branches: [ dockerhub-publish ]
+     branches: [ dev ]
 
 jobs:
   publish:
