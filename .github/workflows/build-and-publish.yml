@@ -9,14 +9,13 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Publish Docker and Helm
-      env:
-        AWS_ACCOUNT_NO: "271557913550"
-        ECR_REGISTRY_ID: fast-react-static-renderer-build-image
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
-        AWS_DEFAULT_REGION: us-east-2
-      run: |
-        echo "running scripts/ci/publish.sh"
-        ./scripts/ci/publish.sh
+    - id: docker-publish
+      uses:  bitovi/github-actions-docker-publish@v1
+      with:
+        docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
+        docker_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        org_name: bitovi
+        repo_name: fast-react-static-renderer-build
+    - run: |
+        echo "Image Created:  ${{ env.image }}"
+        echo "Tag Created: ${{ env.tag }}"
