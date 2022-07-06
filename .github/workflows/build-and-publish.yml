@@ -15,6 +15,7 @@ jobs:
       with:
         docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
         docker_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        org_name: bitovi
         repo_name: fast-react-static-renderer-build
     - run: |
         echo "Image Created:  ${{ env.image }}"
