@@ -5,14 +5,17 @@
 [ -z "${RETRY_SLEEP}" ] && RETRY_SLEEP=5
 [ -z "${SLUG_PER_CONTAINER}" ] && SLUG_PER_CONTAINER=3
 
-if [ -z ${CATALOG_URL} ]
-then
-    echo "Catalog URL not provided"
+
+if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh" ]; then
+    echo "Fetching the catalog..."
+    bash $BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh > slugs.json
+else
+    echo "Catalog fetch script not provided."
+    echo "Provide a file in the app: scripts/catalog/fetch.sh"
+    echo "the file should output JSON with the following format: { \"pages\": [] }"
     exit 1
 fi
 
-echo "Fetching the catalog from: ${CATALOG_URL}"
-curl -s "${CATALOG_URL}" > slugs.json
 
 # Decide container count & page per container
 slug_count=`jq '[.pages[]] | length' slugs.json`
