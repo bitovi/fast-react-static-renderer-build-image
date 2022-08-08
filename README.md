@@ -7,6 +7,17 @@ Docker image to run fast-react-static-renderer builds
 - AWS CLI
 - Chrome dependencies
 
+## App expectations
+Apps that are built with this image are expected to have the following:
+- Zipped contents stored in S3
+  - The files should exist in the following location: `$S3_BUCKET_CONTENTS/$APP_SUBPATH/$APP_VERSION/contents.zip`
+- Provide the following script: `scripts/catalog/fetch.sh`
+  - This file should output files with the following format: `{ "pages": [] }`
+  - The build manager will use this script to determine how to create child containers
+
+  S3_PATH_PREFIX_CONTENTS="${APP_SUBPATH}/${APP_VERSION}"
+  S3_FULL_PATH_CONTENTS="$S3_BUCKET_CONTENTS/${S3_PATH_PREFIX_CONTENTS}/contents.zip"
+
 ## App Build
 The `scripts/build/build.sh` performs the following:
 - Pull zip file from s3
@@ -52,8 +63,6 @@ To run the build, Start the container with the following environment variables:
 - `BUILD_MANAGER_MODE`
   - Description: If set `scripts/build/manager-build.sh` will be executed to create child ECS tasks
   - Default: `1`
-- `CATALOG_URL`
-  - Description: URL that hosts the path/slug data
 - `SLUG_PER_CONTAINER`
   - Description: Number of containers each ECS task will build
 - `RETRY_LIMIT`
@@ -157,7 +166,6 @@ docker build -t ecom-build-image:local .
 Set environment variables:
 ```
 BUILD_MANAGER_MODE=1
-CATALOG_URL="https://example.com"
 CONTAINER_OVERRIDE_NAME="myContainerName"
 TASK_DEFINITION="arn:aws:ecs:us-east-1:123456789012:task/MyCluster/d789e94343414c25b9f6bd59eEXAMPLE"
 ECS_CLUSTER_NAME="MyCluster"
@@ -178,7 +186,6 @@ Run the image:
 ```
 docker run --rm --name ecom-build-image \
 -e BUILD_MANAGER_MODE="${BUILD_MANAGER_MODE}" \
--e CATALOG_URL="${CATALOG_URL}" \
 -e CONTAINER_OVERRIDE_NAME="${CONTAINER_OVERRIDE_NAME}" \
 -e TASK_DEFINITION="${TASK_DEFINITION}" \
 -e ECS_CLUSTER_NAME="${ECS_CLUSTER_NAME}" \
