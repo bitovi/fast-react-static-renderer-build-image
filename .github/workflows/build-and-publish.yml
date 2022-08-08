@@ -2,8 +2,11 @@ name: Build and Publish
 
 on:
   push:
-    # TODO: reset to main
-     branches: [ dev ]
+    # TODO: remove before merge
+    branches: [ fetch-script ]
+    # TODO: uncomment before merge
+    # # TODO: reset to main
+    #  branches: [ dev ]
 
 jobs:
   publish:
