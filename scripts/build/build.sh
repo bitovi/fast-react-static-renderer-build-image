@@ -54,8 +54,8 @@ mkdir -p "$BUILD_CONTENTS_DIRECTORY"
 if [ -n "${BUILD_MANAGER_MODE}" ] ; then
   export NEXT_BUILD_ID=$(< /proc/sys/kernel/random/uuid)
   echo "Next Build ID is ${NEXT_BUILD_ID}"
-  # Base build only (no products) if manager mode
-  export PRODUCT_DATA='{"products":[]}'
+  # Base build only (no pages) if manager mode
+  export PAGE_DATA='{"pages":[]}'
 fi
 
 ###
@@ -95,6 +95,7 @@ cd "$BUILD_CONTENTS_DIRECTORY"
 if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/build.sh" ]; then
   echo "scripts/build.sh found."
 
+  BUILD_CONTENTS_DIRECTORY="$BUILD_CONTENTS_DIRECTORY" \
   bash +x "$BUILD_CONTENTS_DIRECTORY/scripts/build.sh"
 else
   echo "scripts/build.sh not found. Running 'npm run build'"
@@ -139,6 +140,7 @@ fi
 ###
 if [ -n "${BUILD_MANAGER_MODE}" ] && [ -f "/opt/frsr-build/scripts/build/manager-build.sh" ]; then
   echo "scripts/manager-build.sh found and build manager mode enabled."
+  BUILD_CONTENTS_DIRECTORY="$BUILD_CONTENTS_DIRECTORY" \
   bash +x "/opt/frsr-build/scripts/build/manager-build.sh"
   echo "Build mode done exiting."
   exit 0

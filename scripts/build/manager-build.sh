@@ -5,16 +5,29 @@
 [ -z "${RETRY_SLEEP}" ] && RETRY_SLEEP=5
 [ -z "${SLUG_PER_CONTAINER}" ] && SLUG_PER_CONTAINER=3
 
+# DEBUGGING - REMOVE
+echo "BUILD_CONTENTS_DIRECTORY: $BUILD_CONTENTS_DIRECTORY"
+echo "ls BUILD_CONTENTS_DIRECTORY"
+ls $BUILD_CONTENTS_DIRECTORY
+echo "ls BUILD_CONTENTS_DIRECTORY/scripts"
+ls $BUILD_CONTENTS_DIRECTORY/scripts
+echo "ls BUILD_CONTENTS_DIRECTORY/scripts/catalog"
+ls $BUILD_CONTENTS_DIRECTORY/scripts/catalog
+
+# END DEBUGGING - REMOVE
 
 if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh" ]; then
-    echo "Fetching the catalog..."
-    bash $BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh > slugs.json
+    echo "Calling the fetch the catalog script ($BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh)..."
+    bash +x $BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh > slugs.json
 else
     echo "Catalog fetch script not provided."
     echo "Provide a file in the app: scripts/catalog/fetch.sh"
     echo "the file should output JSON with the following format: { \"pages\": [] }"
     exit 1
 fi
+
+echo "GOT THE BUILD CONTENTS..."
+cat slugs.json
 
 
 # Decide container count & page per container
