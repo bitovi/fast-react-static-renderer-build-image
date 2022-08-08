@@ -5,17 +5,6 @@
 [ -z "${RETRY_SLEEP}" ] && RETRY_SLEEP=5
 [ -z "${SLUG_PER_CONTAINER}" ] && SLUG_PER_CONTAINER=3
 
-# DEBUGGING - REMOVE
-echo "BUILD_CONTENTS_DIRECTORY: $BUILD_CONTENTS_DIRECTORY"
-echo "ls BUILD_CONTENTS_DIRECTORY"
-ls $BUILD_CONTENTS_DIRECTORY
-echo "ls BUILD_CONTENTS_DIRECTORY/scripts"
-ls $BUILD_CONTENTS_DIRECTORY/scripts
-echo "ls BUILD_CONTENTS_DIRECTORY/scripts/catalog"
-ls $BUILD_CONTENTS_DIRECTORY/scripts/catalog
-
-# END DEBUGGING - REMOVE
-
 if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh" ]; then
     echo "Calling the fetch the catalog script ($BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh)..."
     bash +x $BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh > slugs.json
@@ -26,7 +15,7 @@ else
     exit 1
 fi
 
-echo "GOT THE BUILD CONTENTS..."
+echo "Fetched the pages..."
 cat slugs.json
 
 
