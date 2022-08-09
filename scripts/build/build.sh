@@ -139,10 +139,13 @@ fi
 ### Run build manager
 ###
 if [ -n "${BUILD_MANAGER_MODE}" ] && [ -f "/opt/frsr-build/scripts/build/manager-build.sh" ]; then
+  starttime_buildmanager=`date +%s`
   echo "scripts/manager-build.sh found and build manager mode enabled."
   BUILD_CONTENTS_DIRECTORY="$BUILD_CONTENTS_DIRECTORY" \
   bash +x "/opt/frsr-build/scripts/build/manager-build.sh"
   echo "Build mode done exiting."
+  endtime_buildmanager=`date +%s`
+  log_time "buildmanager" $starttime_buildmanager $endtime_buildmanager
   exit 0
 else
   echo "Skip build manager. Running build."
