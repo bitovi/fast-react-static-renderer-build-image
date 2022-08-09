@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set defaults if not provided
-[ -z "${RETRY_LIMIT}" ] && RETRY_LIMIT=3
-[ -z "${RETRY_SLEEP}" ] && RETRY_SLEEP=5
+[ -z "${RETRY_LIMIT}" ] && RETRY_LIMIT=20
+[ -z "${RETRY_SLEEP}" ] && RETRY_SLEEP=2
 [ -z "${PAGES_PER_CONTAINER}" ] && PAGES_PER_CONTAINER=3
 
 echo "RETRY_SLEEP=$RETRY_SLEEP"
