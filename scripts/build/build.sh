@@ -139,7 +139,11 @@ if [ -n "$PUBLISH_S3_BUCKET" ]; then
   # ONLY Build manager mode should use --delete to clear our previous builds
   if [ -n "${BUILD_MANAGER_MODE}" ] ; then
     echo "Manager Mode: Removing old content and syncing with cloud"
-    aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH --delete
+    if [ -n "${BUILD_MANAGER_MODE_VERBOSE_S3_SYNC}" ]; then
+      aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH --delete
+    else
+      aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH --delete --quiet
+    fi
   else
     aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH
   fi
