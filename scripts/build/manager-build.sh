@@ -7,6 +7,7 @@
 
 if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh" ]; then
     echo "Calling the fetch the catalog script ($BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh)..."
+    BUILD_CONTENTS_DIRECTORY="$BUILD_CONTENTS_DIRECTORY" \
     bash +x $BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh > slugs.json
 else
     echo "Catalog fetch script not provided."
