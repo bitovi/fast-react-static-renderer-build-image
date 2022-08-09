@@ -49,6 +49,7 @@ container_ids=()
 container_data=()
 
 
+SLUG_SLICE_FILE_PREFIX_UUID=$(< /proc/sys/kernel/random/uuid)
 for (( c=0; c<${container_count}; c++))
 do
     slug_slice=""
@@ -56,17 +57,19 @@ do
     if [ -e slugs.json ]
         then
             # Output as text so json is not evaluated by the AWS CLI
-            slug_slice=$(jq "{pages: .pages[${array_start}:${array_end}]} | @text" slugs.json)
+            # slug_slice=$(jq "{pages: .pages[${array_start}:${array_end}]} | @text" slugs.json)
+            slug_slice=$(jq --raw-output "{pages: .pages[${array_start}:${array_end}]} | @json" slugs.json)
 
             echo "pushing slug slices to s3"
             SLUG_SLICE_FILE_UUID=$(< /proc/sys/kernel/random/uuid)
             SLUG_SLICE_FILE="${SLUG_SLICE_FILE_UUID}.json"
-            S3_PATH_PREFIX_SLUG_SLICE_FILE="slug-slices/${APP_SUBPATH}/${APP_VERSION}"
+            S3_PATH_PREFIX_SLUG_SLICE_FILE="slug-slices/${APP_SUBPATH}/${APP_VERSION}/${SLUG_SLICE_FILE_PREFIX_UUID}"
             S3_FULL_PATH_SLUG_SLICE_FILE="$S3_BUCKET_CONTENTS/${S3_PATH_PREFIX_SLUG_SLICE_FILE}/${SLUG_SLICE_FILE}"
 
             echo "SLUG_SLICE_FILE=$SLUG_SLICE_FILE"
             echo "S3_PATH_PREFIX_SLUG_SLICE_FILE=$S3_PATH_PREFIX_SLUG_SLICE_FILE"
             echo "S3_FULL_PATH_SLUG_SLICE_FILE=$S3_FULL_PATH_SLUG_SLICE_FILE"
+            echo "SLUG_SLICE_FILE_PREFIX_UUID=$SLUG_SLICE_FILE_PREFIX_UUID"
 
             echo "$slug_slice" > "$SLUG_SLICE_FILE"
             aws s3 cp "$SLUG_SLICE_FILE" s3://$S3_FULL_PATH_SLUG_SLICE_FILE 
