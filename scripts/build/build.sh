@@ -96,6 +96,13 @@ fi
 ###
 starttime_build=`date +%s`
 echo "run the build"
+if [ -n "$PAGE_DATA" ]; then
+  echo "==="
+  echo "PAGE_DATA provided:"
+  echo "$PAGE_DATA"
+  echo "==="
+fi
+
 cd "$BUILD_CONTENTS_DIRECTORY"
 
 if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/build.sh" ]; then
