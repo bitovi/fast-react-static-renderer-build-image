@@ -5,6 +5,10 @@
 [ -z "${RETRY_SLEEP}" ] && RETRY_SLEEP=5
 [ -z "${PAGES_PER_CONTAINER}" ] && PAGES_PER_CONTAINER=3
 
+echo "RETRY_SLEEP=$RETRY_SLEEP"
+echo "RETRY_LIMIT=$RETRY_LIMIT"
+echo "PAGES_PER_CONTAINER=$PAGES_PER_CONTAINER"
+
 if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh" ]; then
     echo "Calling the fetch the catalog script ($BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh)..."
     BUILD_CONTENTS_DIRECTORY="$BUILD_CONTENTS_DIRECTORY" \
@@ -143,13 +147,13 @@ done
 echo "Allowing 1 minute for the tasks to start up"
 sleep 60
 
-echo "Sleep ${RETRY_SLEEP} minutes, Retry ${RETRY_LIMIT} times, MaxTimeOut $((${RETRY_LIMIT} * ${RETRY_SLEEP})) minutes"
 
 # TODO: implement use to track successful tasks and failed tasks
 success_array=()
 fail_array=()
 
 echo "Determining task statuses..."
+echo "Sleep ${RETRY_SLEEP} minutes, Retry ${RETRY_LIMIT} times, MaxTimeOut $((${RETRY_LIMIT} * ${RETRY_SLEEP})) minutes"
 # Determine task statuses
 for (( r=1; r<$(( ${RETRY_LIMIT} + 1 )); r++ ))
 do
