@@ -61,7 +61,7 @@ do
             echo "pushing slug slices to s3"
             SLUG_SLICE_FILE_UUID=$(< /proc/sys/kernel/random/uuid)
             SLUG_SLICE_FILE="${SLUG_SLICE_FILE_UUID}.json"
-            S3_PATH_PREFIX_SLUG_SLICE_FILE="${APP_SUBPATH}/${APP_VERSION}"
+            S3_PATH_PREFIX_SLUG_SLICE_FILE="slug-slices/${APP_SUBPATH}/${APP_VERSION}"
             S3_FULL_PATH_SLUG_SLICE_FILE="$S3_BUCKET_CONTENTS/${S3_PATH_PREFIX_SLUG_SLICE_FILE}/${SLUG_SLICE_FILE}"
 
             echo "SLUG_SLICE_FILE=$SLUG_SLICE_FILE"
