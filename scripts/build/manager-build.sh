@@ -144,9 +144,6 @@ EOF
 
 done
 
-echo "Allowing 1 minute for the tasks to start up"
-sleep 60
-
 
 # TODO: implement use to track successful tasks and failed tasks
 success_array=()
