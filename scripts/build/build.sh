@@ -159,12 +159,6 @@ if [ -n "${BUILD_MANAGER_MODE}" ] && [ -f "/opt/frsr-build/scripts/build/manager
   echo "Build mode done exiting."
   endtime_buildmanager=`date +%s`
   log_time "buildmanager" $starttime_buildmanager $endtime_buildmanager
-  ###
-  ### Timing: script
-  ###
-  endtime_script=`date +%s`
-  log_time "script" $starttime_script $endtime_script
-  exit 0
 else
   echo "Skip build manager. Running build."
 fi
