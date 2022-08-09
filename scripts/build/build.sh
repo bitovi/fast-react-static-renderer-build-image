@@ -42,7 +42,7 @@ if [ -z "$APP_VERSION" ]; then
 fi
 
 if [ -z "$APP_SUBPATH" ]; then
-  APP_SUBPATH="react"
+  export APP_SUBPATH="react"
 fi
 
 
@@ -170,6 +170,7 @@ fi
 if [ -n "${BUILD_MANAGER_MODE}" ] && [ -f "/opt/frsr-build/scripts/build/manager-build.sh" ]; then
   starttime_buildmanager=`date +%s`
   echo "scripts/manager-build.sh found and build manager mode enabled."
+  APP_SUBPATH="$APP_SUBPATH" \
   BUILD_CONTENTS_DIRECTORY="$BUILD_CONTENTS_DIRECTORY" \
   bash +x "/opt/frsr-build/scripts/build/manager-build.sh"
   echo "Build mode done exiting."
