@@ -54,13 +54,14 @@ mkdir -p "$BUILD_CONTENTS_DIRECTORY"
 if [ -n "${BUILD_MANAGER_MODE}" ] ; then
   export NEXT_BUILD_ID=$(< /proc/sys/kernel/random/uuid)
   echo "Next Build ID is ${NEXT_BUILD_ID}"
-  # Base build only (no products) if manager mode
-  export PRODUCT_DATA='{"products":[]}'
+  # Base build only (no pages) if manager mode
+  export PAGE_DATA='{"pages":[]}'
 fi
 
 ###
 ### Pull the contents from s3
 ###
+ZIP_CONTENTS_PATH="$BUILD_CONTENTS_DIRECTORY/contents.zip"
 if [ -n "$S3_BUCKET_CONTENTS" ]; then
   starttime_s3_pull=`date +%s`
   S3_PATH_PREFIX_CONTENTS="${APP_SUBPATH}/${APP_VERSION}"
@@ -70,17 +71,22 @@ if [ -n "$S3_BUCKET_CONTENTS" ]; then
   echo "S3_BUCKET_CONTENTS: $S3_BUCKET_CONTENTS"
   echo "S3_PATH_PREFIX_CONTENTS: $S3_PATH_PREFIX_CONTENTS"
   echo "S3_FULL_PATH_CONTENTS: $S3_FULL_PATH_CONTENTS"
-  aws s3 cp s3://$S3_FULL_PATH_CONTENTS "$BUILD_CONTENTS_DIRECTORY/contents.zip"
+  aws s3 cp s3://$S3_FULL_PATH_CONTENTS "$ZIP_CONTENTS_PATH"
   endtime_s3_pull=`date +%s`
   log_time "s3_pull" $starttime_s3_pull $endtime_s3_pull
+fi
 
+if [ -f "$ZIP_CONTENTS_PATH" ]; then
   ###
   ### Unzip the contents
   ###
   starttime_unzip=`date +%s`
-  echo "extract the contents of contents.zip"
-  unzip "$BUILD_CONTENTS_DIRECTORY/contents.zip" -d "$BUILD_CONTENTS_DIRECTORY"
-  rm "$BUILD_CONTENTS_DIRECTORY/contents.zip"
+  echo "extract the contents of contents.zip..."
+  unzip -q "$ZIP_CONTENTS_PATH" -d "$BUILD_CONTENTS_DIRECTORY"
+  echo "extract the contents of contents.zip...Done"
+  if [ -z "$SKIP_REMOVE_CONTENTS_ZIP" ]; then
+    rm "$ZIP_CONTENTS_PATH"
+  fi
   endtime_unzip=`date +%s`
   log_time "unzip" $starttime_unzip $endtime_unzip
 fi
@@ -90,11 +96,19 @@ fi
 ###
 starttime_build=`date +%s`
 echo "run the build"
+if [ -n "$PAGE_DATA" ]; then
+  echo "==="
+  echo "PAGE_DATA provided:"
+  echo "$PAGE_DATA"
+  echo "==="
+fi
+
 cd "$BUILD_CONTENTS_DIRECTORY"
 
 if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/build.sh" ]; then
   echo "scripts/build.sh found."
 
+  BUILD_CONTENTS_DIRECTORY="$BUILD_CONTENTS_DIRECTORY" \
   bash +x "$BUILD_CONTENTS_DIRECTORY/scripts/build.sh"
 else
   echo "scripts/build.sh not found. Running 'npm run build'"
@@ -138,9 +152,18 @@ fi
 ### Run build manager
 ###
 if [ -n "${BUILD_MANAGER_MODE}" ] && [ -f "/opt/frsr-build/scripts/build/manager-build.sh" ]; then
+  starttime_buildmanager=`date +%s`
   echo "scripts/manager-build.sh found and build manager mode enabled."
+  BUILD_CONTENTS_DIRECTORY="$BUILD_CONTENTS_DIRECTORY" \
   bash +x "/opt/frsr-build/scripts/build/manager-build.sh"
   echo "Build mode done exiting."
+  endtime_buildmanager=`date +%s`
+  log_time "buildmanager" $starttime_buildmanager $endtime_buildmanager
+  ###
+  ### Timing: script
+  ###
+  endtime_script=`date +%s`
+  log_time "script" $starttime_script $endtime_script
   exit 0
 else
   echo "Skip build manager. Running build."
