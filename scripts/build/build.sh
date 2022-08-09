@@ -101,6 +101,17 @@ if [ -n "$PAGE_DATA" ]; then
   echo "PAGE_DATA provided:"
   echo "$PAGE_DATA"
   echo "==="
+elif [ -n "$S3_FULL_PATH_SLUG_SLICE_FILE" ]; then
+  echo "S3_FULL_PATH_SLUG_SLICE_FILE provided. Fetching PAGE_DATA from s3"
+  echo "$S3_FULL_PATH_SLUG_SLICE_FILE"
+
+  SLUG_SLICE_FILE="page-slugs.json"
+  aws s3 cp s3://$S3_FULL_PATH_SLUG_SLICE_FILE "$SLUG_SLICE_FILE"
+  export PAGE_DATA=$(cat "$SLUG_SLICE_FILE")
+  echo "==="
+  echo "PAGE_DATA:"
+  echo "$PAGE_DATA"
+  echo "==="
 fi
 
 cd "$BUILD_CONTENTS_DIRECTORY"
@@ -108,6 +119,7 @@ cd "$BUILD_CONTENTS_DIRECTORY"
 if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/build.sh" ]; then
   echo "scripts/build.sh found."
 
+  PAGE_DATA="$PAGE_DATA" \
   BUILD_CONTENTS_DIRECTORY="$BUILD_CONTENTS_DIRECTORY" \
   bash +x "$BUILD_CONTENTS_DIRECTORY/scripts/build.sh"
 else
