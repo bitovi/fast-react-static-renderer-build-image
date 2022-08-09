@@ -3,7 +3,7 @@
 # Set defaults if not provided
 [ -z "${RETRY_LIMIT}" ] && RETRY_LIMIT=3
 [ -z "${RETRY_SLEEP}" ] && RETRY_SLEEP=5
-[ -z "${SLUG_PER_CONTAINER}" ] && SLUG_PER_CONTAINER=3
+[ -z "${PAGES_PER_CONTAINER}" ] && PAGES_PER_CONTAINER=3
 
 if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh" ]; then
     echo "Calling the fetch the catalog script ($BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh)..."
@@ -17,27 +17,33 @@ else
 fi
 
 echo "Fetched the pages..."
+echo "=====slugs.json"
 cat slugs.json
+echo "====="
 
 
 # Decide container count & page per container
 slug_count=`jq '[.pages[]] | length' slugs.json`
-# slug_count=`jq length slugs.json`
+echo "DEBUGGING slug_count: $slug_count"
+
 if ! [[ ${slug_count} =~ ^[0-9]+$ ]] ; then
    echo "error: slug_count not a number" >&2
    exit 1
 fi
 
+
 # Contianer count needs to be rounded to ceiling, to ensure it includes all slugs
-container_count=$(( (${slug_count} / ${SLUG_PER_CONTAINER}) + (${slug_count} % ${SLUG_PER_CONTAINER} > 0 ) ))
+container_count=$(( (${slug_count} / ${PAGES_PER_CONTAINER}) + (${slug_count} % ${PAGES_PER_CONTAINER} > 0 ) ))
+echo "DEBUGGING container_count: $container_count"
 
 # Execute containers & provide container array of slugs to build
 array_start=0
-array_end=$(((${array_start} + ${SLUG_PER_CONTAINER})))
+array_end=$(((${array_start} + ${PAGES_PER_CONTAINER})))
 
 # Limit container | config container count limit
 container_ids=()
 container_data=()
+
 
 for (( c=0; c<${container_count}; c++))
 do
@@ -50,7 +56,7 @@ do
 
             # TODO: test index out of range
             array_start="$((${array_end}))"
-            array_end="$((${array_start} + ${SLUG_PER_CONTAINER}))"
+            array_end="$((${array_start} + ${PAGES_PER_CONTAINER}))"
         else
             echo "DEBUG: slugs.json not found"
             exit 1
@@ -134,7 +140,7 @@ EOF
 
 done
 
-echo "Allowing 1 minute for the tasks to execute"
+echo "Allowing 1 minute for the tasks to start up"
 sleep 60
 
 echo "Sleep ${RETRY_SLEEP} minutes, Retry ${RETRY_LIMIT} times, MaxTimeOut $((${RETRY_LIMIT} * ${RETRY_SLEEP})) minutes"

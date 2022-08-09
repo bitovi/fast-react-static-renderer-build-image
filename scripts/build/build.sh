@@ -61,6 +61,7 @@ fi
 ###
 ### Pull the contents from s3
 ###
+ZIP_CONTENTS_PATH="$BUILD_CONTENTS_DIRECTORY/contents.zip"
 if [ -n "$S3_BUCKET_CONTENTS" ]; then
   starttime_s3_pull=`date +%s`
   S3_PATH_PREFIX_CONTENTS="${APP_SUBPATH}/${APP_VERSION}"
@@ -70,17 +71,22 @@ if [ -n "$S3_BUCKET_CONTENTS" ]; then
   echo "S3_BUCKET_CONTENTS: $S3_BUCKET_CONTENTS"
   echo "S3_PATH_PREFIX_CONTENTS: $S3_PATH_PREFIX_CONTENTS"
   echo "S3_FULL_PATH_CONTENTS: $S3_FULL_PATH_CONTENTS"
-  aws s3 cp s3://$S3_FULL_PATH_CONTENTS "$BUILD_CONTENTS_DIRECTORY/contents.zip"
+  aws s3 cp s3://$S3_FULL_PATH_CONTENTS "$ZIP_CONTENTS_PATH"
   endtime_s3_pull=`date +%s`
   log_time "s3_pull" $starttime_s3_pull $endtime_s3_pull
+fi
 
+if [ -f "$ZIP_CONTENTS_PATH" ]; then
   ###
   ### Unzip the contents
   ###
   starttime_unzip=`date +%s`
-  echo "extract the contents of contents.zip"
-  unzip "$BUILD_CONTENTS_DIRECTORY/contents.zip" -d "$BUILD_CONTENTS_DIRECTORY"
-  rm "$BUILD_CONTENTS_DIRECTORY/contents.zip"
+  echo "extract the contents of contents.zip..."
+  unzip -q "$ZIP_CONTENTS_PATH" -d "$BUILD_CONTENTS_DIRECTORY"
+  echo "extract the contents of contents.zip...Done"
+  if [ -z "$SKIP_REMOVE_CONTENTS_ZIP" ]; then
+    rm "$ZIP_CONTENTS_PATH"
+  fi
   endtime_unzip=`date +%s`
   log_time "unzip" $starttime_unzip $endtime_unzip
 fi
