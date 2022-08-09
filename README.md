@@ -11,8 +11,10 @@ Docker image to run fast-react-static-renderer builds
 Apps that are built with this image are expected to have the following:
 - Zipped contents stored in S3
   - The files should exist in the following location: `$S3_BUCKET_CONTENTS/$APP_SUBPATH/$APP_VERSION/contents.zip`
+  - The files should have `node_modules` built in (i.e. run `npm install` prior to zipping)
+  - Zip the contents with symlinks (e.g. `zip --symlinks -r content.zip .`)
 - Provide the following script: `scripts/catalog/fetch.sh`
-  - This file should output files with the following format: `{ "pages": [] }`
+  - This file should output files with the following format: `{ "pages": [] }`.  The output should be ONLY json (i.e. should not contain any other output)
   - The build manager will use this script to determine how to create child containers
 
   S3_PATH_PREFIX_CONTENTS="${APP_SUBPATH}/${APP_VERSION}"
