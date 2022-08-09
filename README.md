@@ -65,6 +65,9 @@ To run the build, Start the container with the following environment variables:
 - `BUILD_MANAGER_MODE`
   - Description: If set `scripts/build/manager-build.sh` will be executed to create child ECS tasks
   - Default: `1`
+- `BUILD_MANAGER_MODE_VERBOSE_S3_SYNC`
+  - Description: If set, build manager will not add the `--quiet` flag to the s3 sync command
+  - Default: ``
 - `SLUG_PER_CONTAINER`
   - Description: Number of containers each ECS task will build
 - `RETRY_LIMIT`
