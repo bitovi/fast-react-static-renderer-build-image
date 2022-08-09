@@ -58,6 +58,19 @@ do
             # Output as text so json is not evaluated by the AWS CLI
             slug_slice=$(jq "{pages: .pages[${array_start}:${array_end}]} | @text" slugs.json)
 
+            echo "pushing slug slices to s3"
+            SLUG_SLICE_FILE_UUID=$(< /proc/sys/kernel/random/uuid)
+            SLUG_SLICE_FILE="${SLUG_SLICE_FILE_UUID}.json"
+            S3_PATH_PREFIX_SLUG_SLICE_FILE="${APP_SUBPATH}/${APP_VERSION}"
+            S3_FULL_PATH_SLUG_SLICE_FILE="$S3_BUCKET_CONTENTS/${S3_PATH_PREFIX_SLUG_SLICE_FILE}/${SLUG_SLICE_FILE}"
+
+            echo "SLUG_SLICE_FILE=$SLUG_SLICE_FILE"
+            echo "S3_PATH_PREFIX_SLUG_SLICE_FILE=$S3_PATH_PREFIX_SLUG_SLICE_FILE"
+            echo "S3_FULL_PATH_SLUG_SLICE_FILE=$S3_FULL_PATH_SLUG_SLICE_FILE"
+
+            echo "$slug_slice" > "$SLUG_SLICE_FILE"
+            aws s3 cp "$SLUG_SLICE_FILE" s3://$S3_FULL_PATH_SLUG_SLICE_FILE 
+
             # TODO: test index out of range
             array_start="$((${array_end}))"
             array_end="$((${array_start} + ${PAGES_PER_CONTAINER}))"
@@ -75,8 +88,8 @@ do
                 "name": "APP_VERSION",
                 "value": "${APP_VERSION}"
             },{
-                "name": "PAGE_DATA",
-                "value": ${slug_slice}
+                "name": "S3_FULL_PATH_SLUG_SLICE_FILE",
+                "value": "${S3_FULL_PATH_SLUG_SLICE_FILE}"
             },{
                 "name": "CONTENTFUL_SPACE_ID",
                 "value": "${CONTENTFUL_SPACE_ID}"
