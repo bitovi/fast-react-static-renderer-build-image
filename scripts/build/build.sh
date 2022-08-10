@@ -25,7 +25,7 @@ log_time () {
   local hours=$((runtime / 3600))
   local minutes=$(( (runtime % 3600) / 60 ))
   local seconds=$(( (runtime % 3600) % 60 ))
-  echo "${label}='${hours}h ${minutes}m ${seconds}s'" >> "$log_time_file"
+  echo "${label}='${hours}h ${minutes}m ${seconds}s' (${runtime})" >> "$log_time_file"
 }
 
 
