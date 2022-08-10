@@ -94,6 +94,9 @@ do
                 "name": "S3_FULL_PATH_SLUG_SLICE_FILE",
                 "value": "${S3_FULL_PATH_SLUG_SLICE_FILE}"
             },{
+                "name": "S3_SYNC_EXTRA_FLAGS_CHILD_CONTAINERS",
+                "value": "${S3_SYNC_EXTRA_FLAGS_CHILD_CONTAINERS}"
+            },{
                 "name": "CONTENTFUL_SPACE_ID",
                 "value": "${CONTENTFUL_SPACE_ID}"
             },{

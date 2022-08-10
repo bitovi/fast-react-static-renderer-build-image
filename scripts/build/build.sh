@@ -147,17 +147,19 @@ if [ -n "$PUBLISH_S3_BUCKET" ]; then
   echo "PUBLISH_S3_BUCKET: $PUBLISH_S3_BUCKET"
   echo "S3_PATH_PREFIX: $S3_PATH_PREFIX"
   echo "S3_FULL_PATH: $S3_FULL_PATH"
-
+  echo "S3_SYNC_EXTRA_FLAGS_BUILD_MANAGER: $S3_SYNC_EXTRA_FLAGS_BUILD_MANAGER"
+  echo "S3_SYNC_EXTRA_FLAGS_CHILD_CONTAINERS: $S3_SYNC_EXTRA_FLAGS_CHILD_CONTAINERS"
+  
   # ONLY Build manager mode should use --delete to clear our previous builds
   if [ -n "${BUILD_MANAGER_MODE}" ] ; then
     echo "Manager Mode: Removing old content and syncing with cloud"
     if [ -n "${BUILD_MANAGER_MODE_VERBOSE_S3_SYNC}" ]; then
-      aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH --delete
+      aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH --delete $S3_SYNC_EXTRA_FLAGS_BUILD_MANAGER
     else
-      aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH --delete --quiet
+      aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH --delete --quiet $S3_SYNC_EXTRA_FLAGS_BUILD_MANAGER
     fi
   else
-    aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH
+    aws s3 sync $BUILD_DIRECTORY s3://$S3_FULL_PATH $S3_SYNC_EXTRA_FLAGS_CHILD_CONTAINERS
   fi
 
   endtime_s3_publish=`date +%s`
