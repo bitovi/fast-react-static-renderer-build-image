@@ -2,7 +2,10 @@ name: Build and Publish
 
 on:
   push:
-     branches: [ main ]
+    # TODO: remove before merge
+    branches: [ benchmarking ]
+    # TODO: uncomment before merge
+    # branches: [ main ]
 
 jobs:
   publish:

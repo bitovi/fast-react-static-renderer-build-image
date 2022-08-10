@@ -53,6 +53,8 @@ To run the build, Start the container with the following environment variables:
   - Description: Subpath under `APP_SUBPATH`. Generally applies to the version generated from the microservice (i.e. `latest`, `0.1.0`, branch-name, etc)
 - `S3_BUCKET_CONTENTS`
   - Description: The s3 bucket that has the contents.zip
+- `S3_SYNC_EXTRA_FLAGS`
+  - Description: additional flags to pass to the s3 sync command (e.g. `--include='foo'`)
 - `PUBLISH_S3_BUCKET`
   - Description: The s3 bucket to push the final compiled files to
 - `BUILD_OUTPUT_SUBDIRECTORY`
