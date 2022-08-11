@@ -55,7 +55,7 @@ if [ -n "${BUILD_MANAGER_MODE}" ] ; then
   export NEXT_BUILD_ID=$(< /proc/sys/kernel/random/uuid)
   echo "Next Build ID is ${NEXT_BUILD_ID}"
   # Base build only (no pages) if manager mode
-  export PAGE_DATA='{"pages":[]}'
+  # export PAGE_DATA='{"pages":[]}'
 fi
 
 ###
@@ -106,11 +106,12 @@ elif [ -n "$S3_FULL_PATH_SLUG_SLICE_FILE" ]; then
   echo "$S3_FULL_PATH_SLUG_SLICE_FILE"
 
   SLUG_SLICE_FILE="page-slugs.json"
+  DOT_ENV_FILE="$BUILD_CONTENTS_DIRECTORY/.env"
   aws s3 cp s3://$S3_FULL_PATH_SLUG_SLICE_FILE "$SLUG_SLICE_FILE"
-  export PAGE_DATA=$(cat "$SLUG_SLICE_FILE")
+  echo "PAGE_DATA=$(cat $SLUG_SLICE_FILE)" > $DOT_ENV_FILE
   echo "==="
-  echo "PAGE_DATA:"
-  echo "$PAGE_DATA"
+  echo ".env file contents (includes PAGE_DATA)"
+  cat "$DOT_ENV_FILE"
   echo "==="
 fi
 
