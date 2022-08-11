@@ -8,6 +8,7 @@
 echo "RETRY_SLEEP=$RETRY_SLEEP"
 echo "RETRY_LIMIT=$RETRY_LIMIT"
 echo "PAGES_PER_CONTAINER=$PAGES_PER_CONTAINER"
+echo "BUILD_USE_PAGE_DATA_FILE=$BUILD_USE_PAGE_DATA_FILE"
 
 if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh" ]; then
     echo "Calling the fetch the catalog script ($BUILD_CONTENTS_DIRECTORY/scripts/catalog/fetch.sh)..."
@@ -96,6 +97,9 @@ do
             },{
                 "name": "S3_SYNC_EXTRA_FLAGS_CHILD_CONTAINERS",
                 "value": "${S3_SYNC_EXTRA_FLAGS_CHILD_CONTAINERS}"
+            },{
+                "name": "BUILD_USE_PAGE_DATA_FILE",
+                "value": "${BUILD_USE_PAGE_DATA_FILE}"
             },{
                 "name": "CONTENTFUL_SPACE_ID",
                 "value": "${CONTENTFUL_SPACE_ID}"

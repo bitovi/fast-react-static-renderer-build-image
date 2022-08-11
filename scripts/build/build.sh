@@ -109,6 +109,7 @@ elif [ -n "$S3_FULL_PATH_SLUG_SLICE_FILE" ]; then
     export PAGE_DATA_FILE="$BUILD_CONTENTS_DIRECTORY/page-slugs.json"
     aws s3 cp s3://$S3_FULL_PATH_SLUG_SLICE_FILE "$PAGE_DATA_FILE"
     echo "==="
+    echo "BUILD_USE_PAGE_DATA_FILE set"
     echo "PAGE_DATA_FILE contents ($PAGE_DATA_FILE)"
     cat "$PAGE_DATA_FILE"
     echo "==="
