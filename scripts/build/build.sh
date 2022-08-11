@@ -55,7 +55,7 @@ if [ -n "${BUILD_MANAGER_MODE}" ] ; then
   export NEXT_BUILD_ID=$(< /proc/sys/kernel/random/uuid)
   echo "Next Build ID is ${NEXT_BUILD_ID}"
   # Base build only (no pages) if manager mode
-  # export PAGE_DATA='{"pages":[]}'
+  export PAGE_DATA='{"pages":[]}'
 fi
 
 ###
