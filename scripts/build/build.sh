@@ -105,14 +105,23 @@ elif [ -n "$S3_FULL_PATH_SLUG_SLICE_FILE" ]; then
   echo "S3_FULL_PATH_SLUG_SLICE_FILE provided. Fetching PAGE_DATA from s3"
   echo "$S3_FULL_PATH_SLUG_SLICE_FILE"
 
-  SLUG_SLICE_FILE="page-slugs.json"
-  DOT_ENV_FILE="$BUILD_CONTENTS_DIRECTORY/.env"
-  aws s3 cp s3://$S3_FULL_PATH_SLUG_SLICE_FILE "$SLUG_SLICE_FILE"
-  echo "PAGE_DATA=$(cat $SLUG_SLICE_FILE)" > $DOT_ENV_FILE
-  echo "==="
-  echo ".env file contents (includes PAGE_DATA)"
-  cat "$DOT_ENV_FILE"
-  echo "==="
+  if [ -n "$BUILD_USE_PAGE_DATA_FILE" ]; then
+    export PAGE_DATA_FILE="$BUILD_CONTENTS_DIRECTORY/page-slugs.json"
+    aws s3 cp s3://$S3_FULL_PATH_SLUG_SLICE_FILE "$PAGE_DATA_FILE"
+    echo "==="
+    echo "PAGE_DATA_FILE contents ($PAGE_DATA_FILE)"
+    cat "$PAGE_DATA_FILE"
+    echo "==="
+  else
+    SLUG_SLICE_FILE="page-slugs.json"
+    DOT_ENV_FILE="$BUILD_CONTENTS_DIRECTORY/.env"
+    aws s3 cp s3://$S3_FULL_PATH_SLUG_SLICE_FILE "$SLUG_SLICE_FILE"
+    echo "PAGE_DATA=$(cat $SLUG_SLICE_FILE)" > $DOT_ENV_FILE
+    echo "==="
+    echo ".env file contents (includes PAGE_DATA)"
+    cat "$DOT_ENV_FILE"
+    echo "==="
+  fi
 fi
 
 cd "$BUILD_CONTENTS_DIRECTORY"

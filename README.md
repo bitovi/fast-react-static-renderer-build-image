@@ -61,6 +61,8 @@ To run the build, Start the container with the following environment variables:
   - Description: The s3 bucket to push the final compiled files to
 - `BUILD_OUTPUT_SUBDIRECTORY`
   - Description: The subdirectory under the files directory (i.e. where the contents are unzipped to) to find the compiled files within this container.  For example, if the `npm run build` produces a directory next to the `package.json` called `out`, then this env var should be `out`
+- `BUILD_USE_PAGE_DATA_FILE`
+  - Description: If set, the `PAGE_DATA_FILE` file will contain the contents of the page data for child containers
 - `CLOUDFRONT_DISTRIBUTION_ID`
   - Description: ID of a CloudFront distribution. If specified, the distribution will be invalidated after the contents have been published.
 - `CLOUDFRONT_DISTRIBUTION_INVALIDATION_PATHS`
