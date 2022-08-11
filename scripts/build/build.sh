@@ -119,7 +119,6 @@ cd "$BUILD_CONTENTS_DIRECTORY"
 if [ -f "$BUILD_CONTENTS_DIRECTORY/scripts/build.sh" ]; then
   echo "scripts/build.sh found."
 
-  PAGE_DATA="$PAGE_DATA" \
   BUILD_CONTENTS_DIRECTORY="$BUILD_CONTENTS_DIRECTORY" \
   bash +x "$BUILD_CONTENTS_DIRECTORY/scripts/build.sh"
 else
