@@ -91,12 +91,18 @@ if [ -f "$ZIP_CONTENTS_PATH" ]; then
   log_time "unzip" $starttime_unzip $endtime_unzip
 fi
 
+
 ###
 ### Run the build
 ###
 starttime_build=`date +%s`
 echo "run the build"
-if [ -n "$PAGE_DATA" ]; then
+if [ -n "${BUILD_MANAGER_MODE}" ] && [ -n "$BUILD_MANAGER_USE_PAGE_DATA_FILE" ]; then
+  echo "BUILD_MANAGER_MODE and BUILD_MANAGER_USE_PAGE_DATA_FILE"
+  export PAGE_DATA_FILE="$BUILD_CONTENTS_DIRECTORY/page-slugs.json"
+  echo "Populate PAGE_DATA_FILE ($PAGE_DATA_FILE) with PAGE_DATA($PAGE_DATA)"
+  echo "$PAGE_DATA" > "$PAGE_DATA_FILE"
+elif [ -n "$PAGE_DATA" ]; then
   echo "==="
   echo "PAGE_DATA provided:"
   echo "$PAGE_DATA"
