@@ -1,9 +1,9 @@
-name: Build and Publish Release
+name: Build and Publish Tag
 
 on:
   push:
-    branches:
-      - 'releases/**'
+    tags:
+      - v**
 
 jobs:
   publish:
